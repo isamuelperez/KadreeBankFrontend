@@ -1,0 +1,212 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <p-card class="p-card p-component shadow-lg p-mb-3">
+        <div class="mb-3">
+          <h1 class="text-center">Reporte de Transacciones</h1>
+        </div>
+        <form [formGroup]="formulario">
+          <div class="mb-3">
+            <label class="form-label">Número de Cuenta</label>
+            <input
+              pInputText
+              class="w-100"
+              formControlName="numeroCuenta"
+              placeholder="Ingrese el número de cuenta"
+            />
+
+            @if (
+              formulario.get('numeroCuenta')?.invalid && formulario.get('numeroCuenta')?.touched
+            ) {
+              <small class="text-danger">El número de cuenta es obligatorio.</small>
+            }
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Año</label>
+            <p-inputnumber formControlName="year" class="w-100" styleClass="w-100"> </p-inputnumber>
+
+            @if (formulario.get('year')?.invalid && formulario.get('year')?.touched) {
+              <small class="text-danger">Ingrese un año válido.</small>
+            }
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Mes</label>
+            <p-inputnumber formControlName="month" class="w-100" styleClass="w-100">
+            </p-inputnumber>
+
+            @if (formulario.get('month')?.invalid && formulario.get('month')?.touched) {
+              <small class="text-danger">Ingrese un mes válido.</small>
+            }
+          </div>
+     
+
+          <div class="d-flex flex-column flex-md-row gap-2">
+            <button pButton severity="info" class="flex-fill" (click)="search()">Busqueda</button>
+             <button pButton raised severity="contrast" class="flex-fill" (click)="clear()">Limpiar</button>
+          </div>
+        </form>
+      </p-card>
+    </div>
+  </div>
+</div>
+
+<div>
+  @if (account()) {
+    <div>
+      <h2 class="py-5">Información de la cuenta</h2>
+      <tr class="row">
+        <td><strong>IdCuenta</strong>: {{ account()?.id }}</td>
+        <td><strong>NumeroCuenta</strong>: {{ account()?.accountNumber }}</td>
+        <td><strong>Ciudad de creación</strong>: {{ account()?.originCity }}</td>
+        <td><strong>Saldo</strong>: {{ account()?.balance }}</td>
+      </tr>
+    </div>
+  }
+
+  @if (listrecents().length > 0) {
+    <h2 class="py-5">Transacciones recientes de la cuenta</h2>
+      <p-table [value]="listrecents()" responsiveLayout="scroll">
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="id" style="width: 20%">
+            Transacción Id <p-sort-icon field="id"></p-sort-icon>
+          </th>
+          <th pSortableColumn="type" style="width: 20%">
+            Tipo <p-sort-icon field="type"></p-sort-icon>
+          </th>
+          <th pSortableColumn="city" style="width: 20%">
+            Ciudad <p-sort-icon field="city"></p-sort-icon>
+          </th>
+          <th pSortableColumn="amount" style="width: 20%">
+            Monto <p-sort-icon field="amount"></p-sort-icon>
+          </th>
+          <th pSortableColumn="transactionDate" style="width: 20%">
+            Fecha de Transacción <p-sort-icon field="transactionDate"></p-sort-icon>
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-transaction>
+        <tr>
+          <td>{{ transaction.id }}</td>
+          <td>{{ transaction.type }}</td>
+          <td>{{ transaction.city }}</td>
+          <td>{{ transaction.amount }}</td>
+          <td>{{ transaction.transactionDate | date }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+
+  @if (listMonthlyAccountStatement(); as statement) {
+    <section class="mt-5" aria-labelledby="monthly-statement-title">
+      <h2 id="monthly-statement-title" class="py-3">Estado de cuenta mensual</h2>
+
+      <dl class="row">
+        <dt class="col-sm-4">Id de cuenta</dt>
+        <dd class="col-sm-8">{{ statement.accountId }}</dd>
+        <dt class="col-sm-4">Número de cuenta</dt>
+        <dd class="col-sm-8">{{ statement.accountNumber }}</dd>
+        <dt class="col-sm-4">Saldo actual</dt>
+        <dd class="col-sm-8">{{ statement.currentBalance }}</dd>
+        <dt class="col-sm-4">Cliente</dt>
+        <dd class="col-sm-8">{{ statement.customerName }}</dd>
+        <dt class="col-sm-4">Total depósitos</dt>
+        <dd class="col-sm-8">{{ statement.totalDeposits }}</dd>
+        <dt class="col-sm-4">Total retiros</dt>
+        <dd class="col-sm-8">{{ statement.totalWithdrawals }}</dd>
+      </dl>
+
+      <h3 class="h5 mt-4">Movimientos</h3>
+      @if (statement.movements?.length > 0) {
+        <p-table [value]="statement.movements" responsiveLayout="scroll">
+          <ng-template #header>
+            <tr>
+              <th>Tipo</th>
+              <th>Monto</th>
+              <th>Ciudad</th>
+              <th>Fecha de transacción</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-movement>
+            <tr>
+              <td>{{ movement.type }}</td>
+              <td>{{ movement.amount }}</td>
+              <td>{{ movement.city }}</td>
+              <td>{{ movement.transactionDate | date }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      } @else {
+        <p>No hay movimientos para este período.</p>
+      }
+    </section>
+  }
+
+  @if (listMonthlyCustomerTransactions().length > 0) {
+    <h2 class="py-5">Cantidad de transacciones del mes por cliente</h2>
+
+    <p-table [value]="listMonthlyCustomerTransactions()" responsiveLayout="scroll">
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="customerId" style="width: 20%">
+            Cliente Id <p-sort-icon field="customerId"></p-sort-icon>
+          </th>
+          <th pSortableColumn="customerName" style="width: 20%">
+            Cliente <p-sort-icon field="customerName"></p-sort-icon>
+          </th>
+          <th pSortableColumn="transactionCount" style="width: 20%">
+            Cantidad de transacciones<p-sort-icon field="transactionCount"></p-sort-icon>
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-transaction>
+        <tr>
+          <td>{{ transaction.customerId }}</td>
+          <td>{{ transaction.customerName }}</td>
+          <td>{{ transaction.transactionCount }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+
+  @if (lisOutOfCityWithdrawals().length>0) {
+
+       <h2 class="py-5">Cantidad de retiros fuera de ciudad de la creacion de la cuenta</h2>
+
+    <p-table [value]="lisOutOfCityWithdrawals()" responsiveLayout="scroll">
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="customerId" style="width: 20%">
+            Cliente Id <p-sort-icon field="customerId"></p-sort-icon>
+          </th>
+          <th pSortableColumn="customerName" style="width: 20%">
+            Cliente <p-sort-icon field="customerName"></p-sort-icon>
+          </th>
+    
+          <th pSortableColumn="totalWithdrawals" style="width: 20%">
+            Total monto en retiros<p-sort-icon field="totalWithdrawals"></p-sort-icon>
+          </th>
+
+          <th pSortableColumn="withdrawalCount" style="width: 20%">
+            Cantidad de retiros<p-sort-icon field="withdrawalCount"></p-sort-icon>
+          </th>
+
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-transaction>
+        <tr>
+          <td>{{ transaction.customerId }}</td>
+          <td>{{ transaction.customerName }}</td>
+          <td>{{ transaction.totalWithdrawals }}</td>
+        <td>{{ transaction.withdrawalCount }}</td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+  }
+</div>

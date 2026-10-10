@@ -1,0 +1,70 @@
+<p-toast></p-toast>
+<p-confirmdialog [style]="{width: '50vw'}"></p-confirmdialog>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <p-card class="p-card p-component shadow-lg p-mb-3">
+
+                <div class="mb-3">
+                    <h1 class="text-center">Transacciones Bancarias</h1>
+                </div>
+                <form [formGroup]="formulario">
+
+                    <div class="mb-3">
+                        <label class="form-label">Número de Cuenta</label>
+                        <input pInputText class="w-100" formControlName="numeroCuenta"
+                            placeholder="Ingrese el número de cuenta" />
+
+                        @if (formulario.get('numeroCuenta')?.invalid && formulario.get('numeroCuenta')?.touched) {
+                        <small class="text-danger">El número de cuenta es obligatorio.</small>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ciudad</label>
+                        <input pInputText class="w-100" formControlName="city"
+                            placeholder="Ingrese el nombre de la ciudad" />
+
+                        @if (formulario.get('city')?.invalid && formulario.get('city')?.touched) {
+                        <small class="text-danger">La ciudad es obligatoria.</small>
+                        }
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Monto</label>
+                        <p-inputnumber formControlName="amount" class="w-100" mode="currency" currency="COP"
+                            locale="es-CO" styleClass="w-100">
+                        </p-inputnumber>
+
+                        @if (formulario.get('amount')?.invalid && formulario.get('amount')?.touched) {
+                        <small class="text-danger">Ingrese un monto válido.</small>
+                        }
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row gap-2">
+
+                        <button pButton severity="success" class="flex-fill" (click)="consignar()">Consignar</button>
+
+                        <button pButton severity="info" class="flex-fill" (click)="retirar()">Retirar</button>
+
+                    </div>
+
+                </form>
+
+            </p-card>
+        </div>
+    </div>
+</div>
+
+
+<p-dialog [visible]="openDialog()" [closable]="false" [style]="{width: '800px'}" [modal]="true" styleClass="p-fluid">
+    <ng-template #header>
+        <h2>{{transactionType()}}</h2>
+    </ng-template>
+    <p>{{transactionText()}}</p>
+    <ng-template #footer>
+        <button type="button" class="btn btn-danger" (click)="hideDialog()">Cancelar</button>
+        <button type="button" class="p-button-success" (click)="Confirm()">Aceptar</button>
+    </ng-template>
+</p-dialog>
